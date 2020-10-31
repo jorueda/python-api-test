@@ -93,31 +93,73 @@ class DogHouse(object):
         the information, also consider the dogs and breeds fields
         of the DogHouse class to perform data manipulation.
         """
-        raise NotImplementedError
+        url_breeds = 'http://dogs.magnet.cl/api/v1/breeds/'
+        url_dogs = 'http://dogs.magnet.cl/api/v1/dogs/'
+
+        self.breeds = []
+        while url_breeds != None:
+            breed_chunk = get(url_breeds, token)
+            breed = breed_chunk['results']
+            for item in breed:
+                self.breeds.append(item)
+            url_breeds = breed_chunk['next']
+
+        
+        self.dogs = []
+        while url_dogs != None:
+            dog_chunk = get(url_dogs, token)
+            dog = dog_chunk['results']
+            for item in dog:
+                self.dogs.append(item)
+            url_dogs = dog_chunk['next']
+
 
     def get_total_breeds(self) -> int:
         """
         Returns the amount of different breeds in the doghouse
         """
-        raise NotImplementedError
+        self.total_breeds = len(self.breeds)
 
+        return self.total_breeds
+
+    
     def get_total_dogs(self) -> int:
         """
         Returns the amount of dogs in the doghouse
         """
-        raise NotImplementedError
+        self.total_dogs = len(self.dogs)
+
+        return self.total_dogs
+
 
     def get_common_breed(self) -> Breed:
         """
         Returns the most common breed in the doghouse
         """
-        raise NotImplementedError
+        list_breeds = []
+        for breed in self.dogs:
+            list_breeds.append(breed['breed'])
+        maxim = max(list_breeds, key = list_breeds.count)
+        for breed in self.breeds:
+            if breed['id'] == maxim:
+                self.id = breed['id']
+                self.name = breed['name']
+                break
+
+        return self
+        
 
     def get_common_dog_name(self) -> str:
         """
         Returns the most common dog name in the doghouse
         """
-        raise NotImplementedError
+        list_dogs = []
+        for dog in self.dogs:
+            list_dogs.append(dog['name'])
+        maxim = max(list_dogs, key = list_dogs.count)
+
+        return maxim
+        
 
     def send_data(self, data: dict, token: str):
         """
@@ -126,4 +168,5 @@ class DogHouse(object):
 
         Important!! We don't tell you if the answer is correct
         """
-        raise NotImplementedError
+        url_answer = 'http://dogs.magnet.cl/api/v1/answer/'
+        post(url_answer, data, token)
